@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 import numpy as np
@@ -6,6 +7,10 @@ from PIL import Image, ExifTags
 import io
 
 logger = logging.getLogger(__name__)
+
+# Set by Dockerfile so the pre-downloaded model is found instantly.
+# Falls back to ~/.insightface when running locally without the env var.
+_INSIGHTFACE_ROOT = os.environ.get("INSIGHTFACE_HOME")
 
 _app = None
 _facenet = None
@@ -26,7 +31,8 @@ def load_model():
 
     try:
         from insightface.app import FaceAnalysis
-        _app = FaceAnalysis(name="buffalo_l", providers=["CPUExecutionProvider"])
+        root_kw = {"root": _INSIGHTFACE_ROOT} if _INSIGHTFACE_ROOT else {}
+        _app = FaceAnalysis(name="buffalo_l", providers=["CPUExecutionProvider"], **root_kw)
         _app.prepare(ctx_id=-1, det_size=(640, 640))
         _backend = "insightface"
         logger.info(f"InsightFace buffalo_l loaded in {time.time() - t0:.2f}s")
