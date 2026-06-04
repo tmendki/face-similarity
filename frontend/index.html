@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Face Similarity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <svg width="22" height="14" viewBox="0 0 22 14" fill="none" aria-hidden="true">
+        <circle cx="6"  cy="7" r="5" stroke="#00CFFF" stroke-width="1.5"/>
+        <circle cx="16" cy="7" r="5" stroke="#00CFFF" stroke-width="1.5" stroke-opacity="0.6"/>
+      </svg>
+      <span class="logo-text">face<strong>sim</strong></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Face Similarity Analysis</h1>
+      <p class="subtitle">Upload two photos to compute a biometric similarity score using ArcFace embeddings.</p>
+    </section>
+
+    <section class="upload-grid" id="uploadGrid">
+      <!-- Zone 1 -->
+      <div class="upload-zone" id="zone1">
+        <input type="file" id="input1" accept="image/jpeg,image/png,image/webp" hidden />
+        <div class="zone-placeholder" id="placeholder1">
+          <svg class="upload-icon" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <rect x="6" y="14" width="32" height="24" rx="3" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="16.5" cy="23" r="3.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M6 32l8-7 6 5 7-7 11 10" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+            <path d="M22 6v10M18.5 9l3.5-3.5L25.5 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="zone-label">Face 1</span>
+          <span class="zone-hint">Drag &amp; drop or click</span>
+          <span class="zone-formats">JPEG · PNG · WebP · max 10 MB</span>
+        </div>
+        <div class="zone-preview" id="preview1" hidden>
+          <img id="previewImg1" alt="Face 1" />
+          <button class="remove-btn" id="remove1" aria-label="Remove image 1">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <p class="zone-error" id="error1" hidden></p>
+      </div>
+
+      <div class="vs-divider" aria-hidden="true">VS</div>
+
+      <!-- Zone 2 -->
+      <div class="upload-zone" id="zone2">
+        <input type="file" id="input2" accept="image/jpeg,image/png,image/webp" hidden />
+        <div class="zone-placeholder" id="placeholder2">
+          <svg class="upload-icon" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <rect x="6" y="14" width="32" height="24" rx="3" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="16.5" cy="23" r="3.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M6 32l8-7 6 5 7-7 11 10" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+            <path d="M22 6v10M18.5 9l3.5-3.5L25.5 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="zone-label">Face 2</span>
+          <span class="zone-hint">Drag &amp; drop or click</span>
+          <span class="zone-formats">JPEG · PNG · WebP · max 10 MB</span>
+        </div>
+        <div class="zone-preview" id="preview2" hidden>
+          <img id="previewImg2" alt="Face 2" />
+          <button class="remove-btn" id="remove2" aria-label="Remove image 2">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <p class="zone-error" id="error2" hidden></p>
+      </div>
+    </section>
+
+    <!-- Action -->
+    <div class="action-row">
+      <button class="compare-btn" id="compareBtn" disabled>Compare Faces</button>
+      <p class="api-error" id="apiError" hidden></p>
+    </div>
+
+    <!-- Progress (only visible while request is in-flight) -->
+    <div class="progress-wrap" id="progressWrap" hidden>
+      <div class="progress-header">
+        <span class="progress-label" id="progressLabel">Detecting faces…</span>
+        <span class="progress-pct" id="progressPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <section class="results" id="results" hidden>
+      <div class="results-inner">
+
+        <!-- Main score -->
+        <div class="score-row">
+          <div class="score-block">
+            <span class="score-number" id="scoreNumber">0</span>
+            <span class="score-denom">/&thinsp;100</span>
+          </div>
+          <div class="score-label" id="scoreLabel"></div>
+        </div>
+
+        <!-- Similarity bar -->
+        <div class="sim-bar-wrap">
+          <div class="sim-bar" id="simBar">
+            <!-- gradient always spans full width; JS sets --pct to reveal it -->
+          </div>
+          <div class="sim-bar-ticks">
+            <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+          </div>
+        </div>
+
+        <!-- Raw cosine -->
+        <div class="raw-cosine">
+          Raw cosine similarity: <span id="rawCosineVal" class="mono"></span>
+        </div>
+
+        <!-- Breakdown -->
+        <div class="breakdown">
+          <div class="breakdown-title">
+            <span>Geometric Breakdown</span>
+            <span class="breakdown-note">facial landmark geometry · independent of embedding</span>
+          </div>
+          <div class="breakdown-rows" id="breakdownRows"></div>
+        </div>
+
+        <!-- Try another pair -->
+        <button class="reset-btn" id="resetBtn">
+          <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+            <path d="M2 8a6 6 0 1 0 1.5-3.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M2 4v4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Try Another Pair
+        </button>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>ArcFace R100 via InsightFace · embeddings computed server-side · no images stored</p>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
