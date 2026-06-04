@@ -1,6 +1,6 @@
 // Local dev:  http://localhost:8000
 // HF Space:   https://YOUR_HF_USERNAME-face-similarity-api.hf.space
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://tanishmendki-face-similarity-api.hf.space";
 
 const state = { file1: null, file2: null, loading: false };
 let progressTimers = [];
