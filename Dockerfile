@@ -1,16 +1,20 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
-# System libs required by opencv-python-headless and onnxruntime
+# System libs needed by opencv-headless, onnxruntime, and insightface
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libgomp1 \
+    libgl1 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install Python deps (separate layer so they're cached between rebuilds)
 COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Pre-download the buffalo_l model pack during build (~500 MB).
 # Baking it into the image means startup is instant instead of re-downloading every time.
